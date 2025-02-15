@@ -1,4 +1,4 @@
-import randomimport random
+import random
 import textstat
 import requests
 from discord_webhook import DiscordWebhook
