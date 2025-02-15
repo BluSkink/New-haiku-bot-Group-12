@@ -7,11 +7,11 @@ from datetime import datetime
 import schedule
 import time
 
-# New Discord WebHook URL for Group 12
+#Discord WebHook URL for Group 12
 DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1340337052637728828/LO8AicMBhiH2bCGustS59jsbKLBOwCdWVbIUHMdm_9vTZH5pW23OmzbWXIRwQRDY-DEO"
 
 # Define the times to post (24-hour format)
-POST_TIMES = ["09:00", "18:00"]  # Example: 9:00 AM and 6:00 PM
+POST_TIMES = ["09:00", "16:10"]  # Example: 9:00 AM and 6:00 PM
 
 def get_news_from_website():
     """Fetches news headlines from BBC and filters valid ones."""
@@ -20,16 +20,21 @@ def get_news_from_website():
         response = requests.get(url)
         soup = BeautifulSoup(response.text, 'html.parser')
 
-        # Scraping headlines from BBC
-        headlines = [headline.get_text().strip() for headline in soup.find_all(['h1', 'h2', 'h3'])]
+        # Scraping only relevant headline sections
+        headlines = []
 
-        # Remove non-news headlines
+        # Example: BBC uses <h3> for their headlines in certain sections
+        for headline in soup.find_all(['h3', 'h2']):
+            headline_text = headline.get_text().strip()
+            if headline_text and count_syllables(headline_text) <= 20:  # Ensuring syllable count
+                headlines.append(headline_text)
+
+        # Additional filtering for valid headlines, e.g. exclude irrelevant sections
         ignored_phrases = ["Editor's Picks", "Sign up", "Breaking News", "Live Updates"]
         headlines = [h for h in headlines if not any(phrase in h for phrase in ignored_phrases)]
 
-        # Filter out headlines that exceed the syllable limit
-        headlines = [h for h in headlines if count_syllables(h) <= 20]
-
+        if not headlines:
+            print("No suitable headlines found.")
         return headlines[:50]  # Adjust number of headlines if needed
     except Exception as e:
         print(f"Error fetching news: {e}")
@@ -41,8 +46,6 @@ def count_syllables(text):
 
 def create_haiku(headlines):
     """Creates a haiku (5-7-5) from news headlines."""
-    
-    # Stricter syllable filtering
     five_syllable = [h for h in headlines if count_syllables(h) == 5]
     seven_syllable = [h for h in headlines if count_syllables(h) == 7]
 
@@ -91,3 +94,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
