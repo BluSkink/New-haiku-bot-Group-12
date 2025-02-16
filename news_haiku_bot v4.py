@@ -1,9 +1,15 @@
 import random
+
 import textstat
+
 import requests
+
 from discord_webhook import DiscordWebhook
+
 from bs4 import BeautifulSoup
+
 import schedule
+
 import time
 
 # Discord WebHook URL (replace with your actual WebHook)
@@ -17,9 +23,11 @@ POST_TIMES = ["09:00", "18:00"]  # Example: 9:00 AM and 6:00 PM
 
 def get_news_from_website():
     """Fetches news headlines from a website (example: BBC)."""
+
     try:
         url = "https://www.bbc.com"  # Use the website of your choice
         response = requests.get(url)
+
         soup = BeautifulSoup(response.text, 'html.parser')
         
         # Scraping headlines (Example for BBC, updating for more general approach)
@@ -30,9 +38,11 @@ def get_news_from_website():
 
         if not headlines:
             print("No suitable headlines found.")
+
         return headlines[:50]  # Adjust number of headlines if needed
     except Exception as e:
         print(f"Error fetching news: {e}")
+
         return []
 
 def count_syllables(text):
@@ -48,7 +58,9 @@ def create_haiku(headlines):
 
     if len(five_syllable) >= 2 and len(seven_syllable) >= 1:
         haiku = f"{random.choice(five_syllable)}\n{random.choice(seven_syllable)}\n{random.choice(five_syllable)}"
+
         return haiku
+    
     return "Couldn't form a haiku!"
 
 def send_to_discord(haiku):
@@ -56,6 +68,7 @@ def send_to_discord(haiku):
     try:
         webhook = DiscordWebhook(url=DISCORD_WEBHOOK_URL, content=f"**Today's Haiku:**\n\n{haiku}")
         webhook.execute()
+
         print("Haiku posted to Discord!")
     except Exception as e:
         print(f"Error sending message to Discord: {e}")
@@ -76,6 +89,7 @@ def job():
 def schedule_jobs():
     """Schedule the job to post at specific times."""
     for post_time in POST_TIMES:
+        
         schedule.every().day.at(post_time).do(job)
         print(f"Scheduled a post at {post_time}")
 
